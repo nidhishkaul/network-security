@@ -6,7 +6,6 @@ pymongo
 certifi
 scikit-learn
 scipy
-dill
 pyaml
 
 ##-e .
