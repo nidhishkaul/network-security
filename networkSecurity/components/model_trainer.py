@@ -5,6 +5,7 @@ from networkSecurity.entity.config_entity import ModelTrainerConfig
 from networkSecurity.entity.artifact_entity import DataTransformationArtifacts, ModelTrainerArtifacts, ClassificationMetricArtifact
 
 import sys, os
+import mlflow
 
 from networkSecurity.utils.main_utils.utils import save_object, load_object
 from networkSecurity.utils.main_utils.utils import save_numpy_array, load_numpy_array, evaluate_model
@@ -26,6 +27,17 @@ class ModelTrainer:
         except Exception as e:
             raise NetworkSecurityException(e, sys)
         
+    def track_mlflow(self, model, classification_metric):
+        with mlflow.start_run():
+            f1_score = classification_metric.f1_score
+            precision_score = classification_metric.precision_score
+            accuracy = classification_metric.accuracy_score
+
+            mlflow.log_metric("f1_score",f1_score)
+            mlflow.log_metric("precision",precision_score)
+            mlflow.log_metric("accuracy",accuracy)
+            mlflow.sklearn.log_model(model, "model")
+        
     def train_model(self, x_train, y_train, x_test, y_test):
         models = {
             "Random Forest":RandomForestClassifier(verbose=1),
@@ -42,6 +54,9 @@ class ModelTrainer:
 
         classification_metric_test = get_classification_score(y_test, y_test_pred)
         classification_metric_train = get_classification_score(y_train, y_train_pred)
+
+        # Track the MLflow
+        self.track_mlflow(model, classification_metric_train)
 
         # Load the preprocessor
         preprocessor = load_object(self.data_transformation_artifacts.transformed_object_file_path)
