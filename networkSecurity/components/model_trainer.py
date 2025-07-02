@@ -67,6 +67,10 @@ class ModelTrainer:
         network_model = NetworkModel(preprocessor=preprocessor, model=model)
         save_object(self.model_trainer_config.trainer_model_file_path, obj = network_model)
 
+        # Save model and preprocessor to final_models
+        save_object("final_models/model.pkl",model)
+        save_object("final_models/preprocessor.pkl",preprocessor)
+
         # Model Trainer Artifacts
         model_trainer_artifact = ModelTrainerArtifacts(trainer_model_file_path=self.model_trainer_config.trainer_model_file_path,
             train_metric_artifact=classification_metric_train,
